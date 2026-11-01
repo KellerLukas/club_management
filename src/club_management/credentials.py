@@ -24,5 +24,5 @@ def get_client_credentials(
     if item_uuid is None:
         raise ValueError("Environment credentials or a 1Password item are required.")
     item = OnePassword().get_item(uuid=item_uuid, vault=vault_uuid)
-    fields = {field["id"]: field["value"] for field in item["fields"]}
-    return fields[client_id_field], fields[client_secret_field]
+    fields = {field["id"]: field for field in item["fields"]}
+    return fields[client_id_field]["value"], fields[client_secret_field]["value"]
