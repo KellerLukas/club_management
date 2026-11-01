@@ -112,5 +112,3 @@ handlers; imports do not configure logging. Keep log files private or collect
 console logs through the service manager, with one rotation owner per file.
 O365 and MSAL default to WARNING; logs are not automatically redacted.
 Filename cleanup preserves Unicode and rejects names over 240 UTF-8 bytes.
-
-See [review notes](docs/review.md) for the remaining release and deployment choices.
