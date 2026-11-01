@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "club-management"
+version = "0.1.0"
+description = "Shared credentials, Microsoft 365, and logging helpers"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Typing :: Typed",
+]
+dependencies = [
+    "1password>=1.1.5,<2", 
+    "o365>=2.1.8,<3"
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8", 
+    "ruff>=0.17", 
+    "mypy>=1.19"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/club_management"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/docs", "/README.md", "/LICENSE", "/pyproject.toml", "/uv.lock"]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+
+[tool.mypy]
+files = ["src"]
+python_version = "3.11"
+strict = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+
+[[tool.mypy.overrides]]
+module = ["O365.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
