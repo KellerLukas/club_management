@@ -44,8 +44,8 @@ Optional arguments select a vault and the item field IDs; defaults are
 
 ## Microsoft 365
 
-Use `O365.Account` directly for application or delegated authentication,
-mailbox queries, read status, folder discovery, and downloads. For example:
+Use `O365.Account` directly for authentication and mailbox selection. The mail
+helpers fetch messages and update read status separately. For example:
 
 ```python
 from pathlib import Path
@@ -53,7 +53,12 @@ from pathlib import Path
 from O365 import Account
 from O365.utils.token import MemoryTokenBackend
 
-from club_management.mail import get_attachments, send_email
+from club_management.mail import (
+    get_attachments,
+    get_inbox_messages,
+    mark_as_read,
+    send_email,
+)
 from club_management.sharepoint import upload_file
 
 account = Account(
@@ -69,10 +74,10 @@ if not account.authenticate():
     raise RuntimeError("Microsoft authentication failed.")
 
 mailbox = account.mailbox(resource="automation@example.com")
-for message in mailbox.inbox_folder().get_messages(query="isRead eq false", limit=100):
+for message in get_inbox_messages(mailbox, limit=100):
     attachments = get_attachments(message)
     # Process the message, then acknowledge success explicitly.
-    message.mark_as_read()
+    mark_as_read(message)
 
 site = account.sharepoint().get_site("site-id")
 folder = site.get_default_document_library().get_item_by_path("/Exports")
@@ -83,6 +88,13 @@ send_email(
     mailbox, subject="Export ready", body=uploaded.web_url, bcc=["member@example.com"]
 )
 ```
+
+`get_inbox_messages` fetches unread messages by default; use `unread_only=False`
+to include read messages. It follows pagination up to `limit`. `get_message`
+fetches one message by its O365 `object_id`. Both return native O365 messages
+without changing read status or downloading attachments. `mark_as_read` updates
+only read status and raises on failure. Configure O365 with `raise_http_errors=True`
+so request failures are reported rather than treated as empty results.
 
 `get_attachments` returns native O365 file attachments, excludes inline content,
 and reuses already downloaded attachments. Their `content` is base64 encoded;

@@ -6,6 +6,43 @@ from O365.mailbox import MailBox
 from O365.message import Message, MessageAttachment
 
 
+def get_inbox_messages(
+    mailbox: MailBox, *, unread_only: bool = True, limit: int = 100
+) -> list[Message]:
+    """Fetch inbox messages without changing read status or downloading attachments.
+
+    Returns native O365 messages and follows pagination up to the positive limit.
+    Set unread_only=False to include messages that were already read.
+    """
+    if type(limit) is not int or limit < 1:
+        raise ValueError("limit must be a positive integer.")
+    return list(
+        mailbox.inbox_folder().get_messages(
+            limit=limit,
+            query="isRead eq false" if unread_only else None,
+            download_attachments=False,
+        )
+    )
+
+
+def get_message(mailbox: MailBox, message_id: str) -> Message:
+    """Fetch by O365 object_id without marking read or downloading attachments."""
+    if not message_id.strip():
+        raise ValueError("message_id is required.")
+    message: Message | None = mailbox.get_message(
+        object_id=message_id, download_attachments=False
+    )
+    if message is None:
+        raise RuntimeError("Could not retrieve the message.")
+    return message
+
+
+def mark_as_read(message: Message) -> None:
+    """Update only read status and raise if O365 reports a failed update."""
+    if not message.mark_as_read():
+        raise RuntimeError("Could not mark the message as read.")
+
+
 def get_attachments(message: Message) -> list[MessageAttachment]:
     """Download file attachments once, excluding inline content."""
     if not message.has_attachments:

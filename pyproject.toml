@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "club-management"
-version = "0.1.1"
+version = "0.1.2"
 description = "Shared credentials, Microsoft 365, and logging helpers"
 readme = "README.md"
 requires-python = ">=3.11"
